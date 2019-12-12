@@ -1,5 +1,5 @@
 # alias-add
-Python tool to permanently add aliases for bash and zsh for those who don't want to hand edit config files. Pretty much what it says on the tin.
+Python tool to permanently add aliases for bash and zsh for those who don't want to hand edit config files. Also appends lines to shell RC afterwards.
 
 Works with Python 3.x, no dependencies required. 
 
