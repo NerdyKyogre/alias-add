@@ -1,22 +1,23 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed Dec  11 12:31:31 2019
+Created on Sun Dec 15 09:54:22 2019
 
 @author: NerdyKyogre
 """
 """
-alias-add v0.0.3
+alias-add v1.0.0
 This program appends aliases permanently to shell rc files of any user for those not comfortable hand editing config files. Supports bash and zsh on MacOS, Linux, and BSD.
 """
 
 import os
+import sys
 
-def start():
-    print("Welcome to alias-add. This program will permanently add your shell aliases so you don't have to.\nFirst, let's determine what sort of system you have.")
-    sh = input("Are you using bash or zsh?\nIf you don't know and you are on a mac with MacOS 10.15 Catalina or later, you probably have zsh. Otherwise, you probably have bash.\nIf you are using bash, type b or bash. For zsh, type z or zsh.\n")
-    while sh != "b"and sh != "bash" and sh != "z" and sh != "zsh":
-        sh = input("That's not a valid shell. Are you using bash or zsh? ")
-    user = input("What user would you like to add the alias(es) to? Note: In order to add to root, this program must be run as root.\n")
+def main():
+    argCount = len(sys.argv) - 1
+    if argCount != 4 or sys.argv[1] == "--help" or sys.argv[1] == "-h" or sys.argv[1] == "help":
+        print("Usage: (sudo) python3 alias-add.py [user] [shell] ['alias'] ['command']")
+        exit()
+    user = sys.argv[1]
     if user == "root":
         rootlink = os.path.exists("/home/root")
         if rootlink == False:
@@ -24,61 +25,21 @@ def start():
         else:
             linkexists = input("Error: link already exists at /home/root. Continue? Y/N: ")
             if linkexists != "Y" and linkexists != "y":
-                print("Goodbye, and thank you for using alias-add.")
                 exit()
-    if sh == "b" or sh == "bash":
-        bash(user)
-    if sh == "z" or sh == "zsh":
-        zsh(user)   
-    if user == "root":
-        if rootlink == False:
-            os.unlink("/home/root")
-    print("Goodbye, and thank you for using alias-add.")
-        
-def bash(user):
-    with open("/home/"+user+"/.bashrc", "a") as shrc:
-        shrc.write("\n# The following lines are aliases written by NerdyKyogre's alias-add. See github.com/NerdyKyogre/alias-add for more info.")
-    while True:
-        alias = input("What would you like your alias to be?\n")
-        cmd = input("What would you like it to stand for?\n")
-        with open("/home/"+user+"/.bashrc", "a") as shrc:
-            shrc.write('\nalias "'+alias+'"="'+cmd+'"')
-        redo = input("Alias set. Log out of your terminal and log back in to save changes.\nWould you like to set another alias before closing? Y/N: ")
-        if redo != "Y" and redo != "y":
-            break
-    while True:
-        extLine = input ("Would you like to add any more lines to your shell rc file? Y/N: ")
-        if extLine == "N" or extLine == "n":
-            break
-        with open("/home/"+user+"/.bashrc", "a") as shrc:
-            append = "null"
-            while append != "Finish":
-                append = input("Please input another line, or type 'Finish' to end the program: ")
-                if append != "Finish":
-                    shrc.write("\n"+append)
-            break
-
-def zsh(user):
-    with open("/home/"+user+"/.zshrc", "a") as shrc:
-        shrc.write("\n# The following lines are aliases written by NerdyKyogre's alias-add. See github.com/NerdyKyogre/alias-add for more info.")
-    while True:
-        alias = input("What would you like your alias to be?\n")
-        cmd = input("What would you like it to stand for?\n")
-        with open("/home/"+user+"/.zshrc", "a") as shrc:
-            shrc.write('\nalias "'+alias+'"="'+cmd+'"')
-        redo = input("Alias set. Log out of your terminal and log back in to save changes.\nWould you like to set another alias before closing? Y/N: ")
-        if redo != "Y" and redo != "y":
-            break
-    while True:
-        extLine = input ("Would you like to add any more lines to your shell rc file? Y/N: ")
-        if extLine == "N" or extLine == "n":
-            break
-        with open("/home/"+user+"/.zshrc", "a") as shrc:
-            append = "null"
-            while append != "Finish":
-                append = input("Please input another line, or type 'Finish' to end the program: ")
-                if append != "Finish":
-                    shrc.write("\n"+append)
-            break
+    shell = sys.argv[2]
+    if shell != "bash" and shell != "zsh":
+        print("That's not a valid shell. Please use bash or zsh.")
+        exit()
+    alias = sys.argv[3]
+    target = sys.argv[4]
     
-start()
+    with open("/home/"+user+"/."+shell+"rc", "a") as shrc:
+        shrc.write("\n# The following alias was written by NerdyKyogre's alias-add. See github.com/NerdyKyogre/alias-add for more info.")
+        shrc.write('\nalias "'+alias+'"="'+target+'"' )
+    
+    print("Done. Alias "+alias+" mapped to "+target+" for "+user+"'s "+shell+".")
+    
+    if user == "root" and rootlink == False:
+        os.unlink("/home/root")
+    
+main()
